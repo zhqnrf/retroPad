@@ -503,19 +503,42 @@ pressModal.addEventListener('click', (e) => {
 
   /* ===== MESSAGE (typewriter) ===== */
   const messageParagraphs = [
-`Hallo Bubis,
+`Hallo Sayang >_<
 
-Happy Birthday!`,
-`Hari ini aku pengen kamu ngerasain semua hal positif dan keajaiban yang cuma bisa didapetin kalau kamu ada di dunia ini.`,
-`Semoga segala keinginanmu tercapai, apalagi yang kocak-kocak dan gak biasa, karena kamu unik banget!`,
-`Aku selalu bersyukur bisa ngeliat kamu jadi versi terbaik setiap hari.`
+
+
+Selamat ulang tahun yang ke-23 🤍❤`,
+
+`Terima kasih udah bertahan sejauh ini.
+Terima kasih udah mau terus berjuang, selalu kuat, dan tidak pernah menyerah, selalu berusaha dan belajar menjadi lebih baik.`,
+
+`I bangga banget sama u, sayang.
+I bersyukur bisa melihat u tumbuh jadi versi terbaik dari dirimu.`,
+
+`Dari dulu i manggil u Mbak Dilla, Twingki, Bubis, sampai sekarang jadi “Sayang”.
+Terima kasih sudah membersamai i di setiap proses, i pun akan membersamai setiap proses u, dan i akan selalu bersama u.
+Di ulang 1000 kali pun, i akan tetap memilih u,
+Karena tujuan kita emang untuk selalu bersama, kan? ✨😉`,
+
+`Di ulang tahunmu ini, semoga segala cita-cita dan doa baikmu perlahan tercapai.
+Jangan lupa untuk selalu jaga kesehatan, selalu menyayangi keluargamu… dan jangan lupa sayang i juga ya, xixi.`,
+
+`Sebelum lanjut hari ini, yuk kita doa bareng dulu, bikin permohonan dan harapan sama-sama 🤲`,
+
+`So, hari ini kita main bareng yuk!
+
+
+
+
+
+Nikmati hari u, have fun, dan ingat… i selalu cinta sama u ❤`
   ];
   let paraIndex=0, charIndex=0, typing=false, typerInterval;
   const msgText=document.getElementById('msgText');
   function openMessage(){ show('#overlay-message'); paraIndex=0; typeStart(); }
   function closeMessage(){ hide('#overlay-message'); stopType(); }
   function typeStart(){ typing=true; const text=messageParagraphs[paraIndex]; msgText.textContent=''; charIndex=0;
-    typerInterval=setInterval(()=>{ msgText.textContent=text.slice(0, ++charIndex); if(charIndex>=text.length) stopType(); },18);
+    typerInterval=setInterval(()=>{ msgText.textContent=text.slice(0, ++charIndex); if(charIndex>=text.length) stopType(); },100);
   }
   function stopType(){ typing=false; clearInterval(typerInterval); }
   document.getElementById('btnSkip').addEventListener('click', ()=>{ if(typing){ stopType(); msgText.textContent=messageParagraphs[paraIndex]; } else nextPara(); });
