@@ -400,18 +400,57 @@
 
 
 <script>
-  /* ===== helpers ===== */
-  const show = sel=>document.querySelector(sel).classList.add('active');
-  const hide = sel=>document.querySelector(sel).classList.remove('active');
+// ===== UTIL =====
+const show = sel => document.querySelector(sel).classList.add('active');
+const hide = sel => document.querySelector(sel).classList.remove('active');
 const videoPrep = document.getElementById('videoPrep');
 function showVideoPreparing(){ if(videoPrep){ videoPrep.style.display='flex'; } }
 function hideVideoPreparing(){ if(videoPrep){ videoPrep.style.display='none'; } }
 
-/* ===== PRESS SOUND (SFX) ===== */
+// ===== BACKGROUND MUSIC (definisikan lebih awal) =====
+const bgm = new Audio('asset/bgsound.mp3');
+bgm.loop = true;
+bgm.preload = 'auto';
+bgm.volume = 1;
+let musicOpen = false, inTetris = false;
+
+// Autoplay muted, unmute saat interaksi pertama
+function tryStartBgm() {
+  bgm.muted = true;
+  bgm.autoplay = true;
+  bgm.play().catch(()=>{});
+
+  const enableSound = () => {
+    bgm.muted = false;
+    bgm.volume = inTetris ? 0.2 : 1;
+    bgm.play().catch(()=>{});
+    window.removeEventListener('click', enableSound);
+    window.removeEventListener('touchstart', enableSound);
+    window.removeEventListener('pointerdown', enableSound);
+    window.removeEventListener('keydown', enableSound);
+  };
+
+  window.addEventListener('click', enableSound, { once:true });
+  window.addEventListener('touchstart', enableSound, { once:true });
+  window.addEventListener('pointerdown', enableSound, { once:true });
+  window.addEventListener('keydown', (e)=> {
+    if (e.key === 'Enter' || e.key === ' ') enableSound();
+  }, { once:true });
+}
+
+function pauseBgm(){ if(!bgm.paused) bgm.pause(); }
+function resumeBgm(){
+  if(!musicOpen){
+    bgm.volume = inTetris ? 0.2 : 1;
+    bgm.play().catch(()=>{});
+  }
+}
+
+// ===== PRESS SOUND (SFX) =====
 const pressSfx = new Audio('asset/hbd.mp3');
 pressSfx.preload = 'auto';
 
-const pressBtn = document.getElementById('pressSound');
+const pressBtn   = document.getElementById('pressSound');
 const pressModal = document.getElementById('pressModal');
 const pressClose = document.getElementById('pressClose');
 
@@ -419,17 +458,17 @@ const pressClose = document.getElementById('pressClose');
 pressBtn.addEventListener('click', () => {
   show('#pressModal');
 
-  // turunin volume bgm sementara
+  // turunin volume bgm sementara, simpan volume lama
   const oldVol = bgm.volume;
-  bgm.volume = 0.4;
+  bgm.volume = Math.min(0.4, oldVol);
 
-  try { 
-    pressSfx.currentTime = 0; 
-    pressSfx.play(); 
+  try {
+    pressSfx.currentTime = 0;
+    pressSfx.play();
   } catch(e) {}
 
-  pressSfx.onended = () => { 
-    bgm.volume =  1; 
+  pressSfx.onended = () => {
+    bgm.volume = oldVol; // balikin ke volume sebelumnya
   };
 });
 
@@ -437,6 +476,8 @@ pressBtn.addEventListener('click', () => {
 pressClose.addEventListener('click', () => {
   hide('#pressModal');
   try { pressSfx.pause(); pressSfx.currentTime = 0; } catch(e){}
+  // optional: balikin volume bila modal ditutup sebelum SFX selesai
+  if (typeof pressSfx.onended === 'function') { bgm.volume = inTetris ? 0.2 : 1; }
 });
 
 // klik di luar kartu untuk menutup
@@ -444,64 +485,27 @@ pressModal.addEventListener('click', (e) => {
   if (e.target === pressModal) {
     hide('#pressModal');
     try { pressSfx.pause(); pressSfx.currentTime = 0; } catch(e){}
+    if (typeof pressSfx.onended === 'function') { bgm.volume = inTetris ? 0.2 : 1; }
   }
 });
 
-
-  /* ===== BACKGROUND MUSIC ===== */
-  const bgm = new Audio('asset/bgsound.mp3');
-  bgm.loop = true;
-  bgm.volume = 1;
-  let musicOpen=false, inTetris=false;
-
-  
-
-  /* ===== SPLASH ===== */
-  (function(){
-    const bar=document.getElementById('bar'), pct=document.getElementById('pct');
-    let p=0; const t=setInterval(()=>{ p+=Math.random()*9+3; if(p>100)p=100;
-      bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
-      if(p>=100){
-        clearInterval(t);
-    function tryStartBgm() {
-  bgm.muted = true;       // mulai dalam kondisi mute (diizinkan autoplay)
-  bgm.autoplay = true;
-  bgm.loop = true;
-
-  bgm.play().catch(() => {});
-
-  // ketika user pertama kali interaksi, unmute + set volume
-  const enableSound = () => {
-    bgm.muted = false;
-    bgm.volume = inTetris ? 0.2 : 1;
-    bgm.play().catch(()=>{});
-    window.removeEventListener('click', enableSound);
-    window.removeEventListener('touchstart', enableSound);
-  };
-
-  window.addEventListener('click', enableSound, {once: true});
-  window.addEventListener('touchstart', enableSound, {once: true});
-}
-
-function pauseBgm() {
-  if (!bgm.paused) bgm.pause();
-}
-
-function resumeBgm() {
-  if (!musicOpen) {
-    bgm.volume = inTetris ? 0.2 : 1;
-    bgm.play().catch(()=>{});
-  }
-}    setTimeout(()=>{
-          document.getElementById('console').style.display='flex';
-          document.getElementById('splash').style.display='none';
-          tryStartBgm(); // mulai bgm setelah splash
-        },280);
-      }
-    },200);
-  })();
-
-  /* ===== NAV from home ===== */
+// ===== SPLASH =====
+(function(){
+  const bar=document.getElementById('bar'), pct=document.getElementById('pct');
+  let p=0;
+  const t=setInterval(()=>{
+    p+=Math.random()*9+3; if(p>100)p=100;
+    bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
+    if(p>=100){
+      clearInterval(t);
+      setTimeout(()=>{
+        document.getElementById('console').style.display='flex';
+        document.getElementById('splash').style.display='none';
+        tryStartBgm(); // mulai bgm setelah splash
+      },280);
+    }
+  },200);
+})();
   document.querySelectorAll('[data-open]').forEach(a=>{
     a.addEventListener('click',e=>{
       e.preventDefault();
