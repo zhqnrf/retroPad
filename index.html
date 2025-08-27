@@ -394,6 +394,22 @@
   <span style="font-size: small;">Video disiapkan… </span>
 </div>
 </div>
+
+<!-- [ADD] START SONG MODAL -->
+<div id="startSongModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:9999;">
+  <div style="width:min(92%,420px);background:#0e0e13;border:3px solid #25f36a;border-radius:14px;box-shadow:0 0 0 4px #0a0a0d inset,0 8px 32px rgba(0,0,0,.6);padding:22px;text-align:center;">
+    <div style="font-weight:900;font-size:20px;letter-spacing:2px;color:#25f36a;text-shadow:0 0 6px rgba(37,243,106,.45);margin-bottom:10px;">▶ PRESS START</div>
+    <div style="font-family:monospace;color:#b7ffd2;font-size:13px;line-height:1.5;margin-bottom:18px;">
+      Izinkan aku merayakan ulang tahunmu sayang 💖✨ , boleh tekan MULAI ?
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="startSongBtn" style="cursor:pointer;flex:1;background:#25f36a;color:#06130a;border:none;border-radius:10px;padding:12px 14px;font-weight:800;letter-spacing:1px;box-shadow:0 4px 0 #159a53;">MULAI</button>
+      <!-- <button id="startSongClose" style="cursor:pointer;background:#181a1f;color:#b1b6bf;border:2px solid #3a3f45;border-radius:10px;padding:12px 14px;font-weight:700;">SKIP</button> -->
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:#6ce8a1;">© Alfa Pad</div>
+  </div>
+</div>
+
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -449,6 +465,47 @@ pressModal.addEventListener('click', (e) => {
 
 
   /* ===== BACKGROUND MUSIC ===== */
+  // [ADD] Handler untuk modal start song
+(function(){
+  const modal = document.getElementById('startSongModal');
+  const btnStart = document.getElementById('startSongBtn');
+  const btnSkip  = document.getElementById('startSongClose');
+  const home     = document.getElementById('console');
+
+  function goHome(){
+    if(home) home.style.display='flex';
+    if(modal) modal.style.display='none';
+  }
+
+  // START: mulai BGM + masuk ke halaman utama
+  if(btnStart){
+    btnStart.addEventListener('click', ()=>{
+      try {
+        // play dengan interaksi user → dipastikan lolos autoplay policy
+        bgm.currentTime = 0;
+        bgm.volume = 1;
+        bgm.play().catch(()=>{ /* fallback via tryStartBgm kalau mau */ tryStartBgm(); });
+      } catch(e){}
+      goHome();
+    });
+  }
+
+  // SKIP: masuk tanpa musik
+  if(btnSkip){
+    btnSkip.addEventListener('click', ()=>{
+      // jangan start bgm
+      goHome();
+    });
+  }
+
+  // Enter = START
+  window.addEventListener('keydown', (e)=>{
+    if(modal && modal.style.display!=='none' && (e.key==='Enter' || e.key===' ')){
+      btnStart && btnStart.click();
+    }
+  });
+})();
+
   const bgm = new Audio('asset/bgsound.mp3');
   bgm.loop = true;
   bgm.volume = 1;
@@ -473,20 +530,25 @@ pressModal.addEventListener('click', (e) => {
   }
 
   /* ===== SPLASH ===== */
-  (function(){
-    const bar=document.getElementById('bar'), pct=document.getElementById('pct');
-    let p=0; const t=setInterval(()=>{ p+=Math.random()*9+3; if(p>100)p=100;
-      bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
-      if(p>=100){
-        clearInterval(t);
-        setTimeout(()=>{
-          document.getElementById('console').style.display='flex';
-          document.getElementById('splash').style.display='none';
-          tryStartBgm(); // mulai bgm setelah splash
-        },280);
-      }
-    },200);
-  })();
+(function(){
+  const bar=document.getElementById('bar'), pct=document.getElementById('pct');
+  let p=0; 
+  const t=setInterval(()=>{
+    p+=Math.random()*9+3; if(p>100)p=100;
+    bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
+    if(p>=100){
+      clearInterval(t);
+      setTimeout(()=>{
+        // sembunyikan splash
+        document.getElementById('splash').style.display='none';
+        // tampilkan modal start song
+        const ssm = document.getElementById('startSongModal');
+        if(ssm) ssm.style.display='flex';
+        // CATATAN: #console baru ditampilkan setelah user klik START/ SKIP
+      },280);
+    }
+  },200);
+})();
 
   /* ===== NAV from home ===== */
   document.querySelectorAll('[data-open]').forEach(a=>{
@@ -517,7 +579,7 @@ I bersyukur bisa melihat u tumbuh jadi versi terbaik dari dirimu.`,
 
 `Dari dulu i manggil u Mbak Dilla, Twingki, Bubis, sampai sekarang jadi “Sayang”.
 Terima kasih sudah membersamai i di setiap proses, i pun akan membersamai setiap proses u, dan i akan selalu bersama u.
-Di ulang 1000 kali pun, i akan tetap memilih u,
+Di ulang 1000 kali pun u, i akan tetap memilih u,
 Karena tujuan kita emang untuk selalu bersama, kan? ✨😉`,
 
 `Di ulang tahunmu ini, semoga segala cita-cita dan doa baikmu perlahan tercapai.
