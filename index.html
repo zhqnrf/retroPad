@@ -454,23 +454,7 @@ pressModal.addEventListener('click', (e) => {
   bgm.volume = 1;
   let musicOpen=false, inTetris=false;
 
-  function tryStartBgm(){
-    bgm.play().catch(()=>{ // autoplay blocked: start after first tap
-      const kick=()=>{ bgm.play().finally(()=>{
-        window.removeEventListener('click',kick);
-        window.removeEventListener('touchstart',kick);
-      }); };
-      window.addEventListener('click',kick,{once:true});
-      window.addEventListener('touchstart',kick,{once:true});
-    });
-  }
-  function pauseBgm(){ if(!bgm.paused) bgm.pause(); }
-  function resumeBgm(){
-    if(!musicOpen){
-      bgm.volume = inTetris ? 0.2 : 1;
-      bgm.play().catch(()=>{});
-    }
-  }
+  
 
   /* ===== SPLASH ===== */
   (function(){
@@ -479,7 +463,36 @@ pressModal.addEventListener('click', (e) => {
       bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
       if(p>=100){
         clearInterval(t);
-        setTimeout(()=>{
+    function tryStartBgm() {
+  bgm.muted = true;       // mulai dalam kondisi mute (diizinkan autoplay)
+  bgm.autoplay = true;
+  bgm.loop = true;
+
+  bgm.play().catch(() => {});
+
+  // ketika user pertama kali interaksi, unmute + set volume
+  const enableSound = () => {
+    bgm.muted = false;
+    bgm.volume = inTetris ? 0.2 : 1;
+    bgm.play().catch(()=>{});
+    window.removeEventListener('click', enableSound);
+    window.removeEventListener('touchstart', enableSound);
+  };
+
+  window.addEventListener('click', enableSound, {once: true});
+  window.addEventListener('touchstart', enableSound, {once: true});
+}
+
+function pauseBgm() {
+  if (!bgm.paused) bgm.pause();
+}
+
+function resumeBgm() {
+  if (!musicOpen) {
+    bgm.volume = inTetris ? 0.2 : 1;
+    bgm.play().catch(()=>{});
+  }
+}    setTimeout(()=>{
           document.getElementById('console').style.display='flex';
           document.getElementById('splash').style.display='none';
           tryStartBgm(); // mulai bgm setelah splash
